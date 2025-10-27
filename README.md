@@ -26,3 +26,25 @@ To load the data:
 from sklearn.datasets import load_diabetes
 data = load_diabetes()
 X, y = data.data, data.target
+
+
+
+
+
+
+
+diabetes-ml-analysis/
+│
+├── data/                   # optional dataset exports
+├── notebooks/
+│   └── diabetes_analysis.ipynb
+├── reports/
+│   └── diabetes_report.pdf
+├── src/
+│   ├── preprocess.py
+│   ├── train_model.py
+│   ├── evaluate.py
+│   └── visualize.py
+├── requirements.txt
+└── README.md
+
