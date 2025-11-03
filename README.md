@@ -48,3 +48,10 @@ diabetes-ml-analysis/
 ├── requirements.txt
 └── README.md
 
+
+## 📄 Report
+You can view the full analysis and model documentation here:
+
+- [Diabetes Regression Report (PDF)](reports/diabetes_report.pdf)
+- [LaTeX Source File](reports/diabetes_report.tex)
+
