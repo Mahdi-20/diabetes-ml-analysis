@@ -53,6 +53,6 @@ diabetes-ml-analysis/
 ## 📄 Report
 You can view the full analysis and model documentation here:
 
-- [Diabetes Regression Report (PDF)](reports/diabetes_report.pdf)
-- [LaTeX Source File](reports/diabetes_report.tex)
+- [Diabetes Regression Report (PDF)](reports/Report on Regression_Assignment_Diabetes.pdf)
+- [LaTeX Source File](Report on Regression_Assignment_Diabetes.tex)
 
