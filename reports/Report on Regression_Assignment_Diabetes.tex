@@ -1,0 +1,208 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\geometry{margin=1in}
+\setstretch{1.3}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=purple,
+    citecolor=blue
+}
+
+\begin{document}
+
+\begin{center}
+    \Large \textbf{Data Analysis Report: Regression Modeling on the Diabetes Dataset}
+\end{center}
+
+\section{Introduction}
+This report documents the comprehensive process of developing and evaluating several regression models to predict the progression of diabetes in patients. The primary objective is to build an accurate and interpretable model by systematically exploring feature preprocessing, applying regularization techniques, and engineering interaction features.
+
+The methodology is grounded in the use of the \texttt{scikit-learn} Diabetes dataset. The analysis begins by establishing a performance baseline using standard Linear Regression and then compares its efficacy against regularized models, namely Ridge and Lasso regression. This comparison is conducted across two distinct phases: an initial phase using only the 10 original predictive features, followed by a second phase that incorporates second-degree interaction features.
+
+By documenting each step—from data inspection to final model diagnostics—this report provides a clear narrative of the analytical journey, culminating in the selection of an optimized model that balances performance with simplicity.
+
+\section{Data Loading and Preprocessing Analysis}
+
+\subsection{Dataset Characteristics}
+The analysis utilizes the Diabetes dataset provided by \texttt{scikit-learn}, which contains data from 442 patients. 
+
+\begin{itemize}
+    \item \textbf{Number of Instances:} 442
+    \item \textbf{Number of Attributes:} 10 numeric predictive features
+    \item \textbf{Target Variable:} Quantitative measure of disease progression one year after baseline
+\end{itemize}
+
+\noindent The 10 predictive features include baseline physiological and blood serum measurements (Table~\ref{tab:features}).
+
+\begin{table}[h!]
+\centering
+\caption{Description of Predictive Features}
+\label{tab:features}
+\begin{tabular}{>{\bfseries}l p{10cm}}
+\toprule
+age & Age (years) \\
+sex & Sex \\
+bmi & Body mass index (kg/m$^2$) \\
+bp & Average blood pressure \\
+s1 & TC – T-Cell count (cholesterol-related) \\
+s2 & LDL – Low-Density Lipoproteins (bad cholesterol) \\
+s3 & HDL – High-Density Lipoproteins (good cholesterol) \\
+s4 & TCH – Total Cholesterol / HDL* \\
+s5 & LTG – Log of serum triglycerides level \\
+s6 & GLU – Blood sugar level (glucose) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Analysis of Pre-Applied Normalization}
+
+The Diabetes dataset, as loaded from \texttt{scikit-learn}, has already been normalized so that each feature has a mean of 0 and a squared length of 1:
+
+\[
+x_{\text{norm}} = \frac{x_{ij} - \text{mean}(x_j)}{\sqrt{\sum (x_{kj} - \text{mean}(x_j))^2}}
+\]
+
+This differs from the \texttt{StandardScaler} normalization, which uses the standard deviation in the denominator.  
+Comparing both methods confirms that the \texttt{scikit-learn} version indeed matches the formula above.
+
+\begin{table}[h!]
+\centering
+\caption{Statistical Properties of Different Scaling Methods}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Data Version} & \textbf{Mean} & \textbf{Std. Deviation} \\
+\midrule
+Raw & Varies by feature & Varies by feature \\
+Diabetes-Normalized & $\approx 0$ & $\approx 0.0476$ \\
+Standard-Scaled & $\approx 0$ & $\approx 1.0$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Exploratory Data Analysis (EDA)}
+
+EDA was conducted to identify relationships between features and detect multicollinearity.
+
+\subsection{Pair Plot Analysis}
+The pair plot revealed clear positive linear relationships between the target variable and \texttt{bmi} and \texttt{bp}.  
+Kernel Density Estimates along the diagonal confirmed that the normalized data are centered near zero.
+
+\subsection{Correlation Heatmap}
+The correlation heatmap revealed that:
+\begin{itemize}
+    \item \textbf{Top correlated features:} \texttt{bmi} (0.586), \texttt{s5} (0.566), \texttt{bp} (0.441)
+    \item \textbf{Most negative correlation:} \texttt{s3} (-0.395)
+    \item \textbf{High collinearity:} \texttt{s1} and \texttt{s2} ($r = 0.897$)
+\end{itemize}
+
+This justified the use of regularization (Ridge, Lasso) to manage correlated predictors.
+
+\subsection{Box Plot and Histogram Analysis}
+Box plots highlighted typical ranges and outliers, while histograms quantified skewness.  
+Example: feature \texttt{s4} showed a positive skewness of 0.89.
+
+\section{Modeling Phase 1: Original Features}
+
+Three models—Linear, Ridge, and Lasso—were trained on the 10 original normalized features.
+
+\subsection{Model Performance Summary}
+
+\begin{table}[h!]
+\centering
+\caption{Model Performance on Original Features}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Model} & \textbf{Test R$^2$} & \textbf{Key Notes} \\
+\midrule
+Linear Regression & 0.453 & Baseline model \\
+Ridge Regression (CV) & 0.457 & Best $\alpha=10.0$ \\
+Lasso Regression (CV) & 0.467 & Best $\alpha=1.0$; retained 9 features \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A fixed-penalty Lasso ($\alpha=5$) reduced active features to 5 and achieved $R^2 = 0.465$.
+
+\subsection{Selected Features (Lasso, $\alpha=5$)}
+\begin{enumerate}
+    \item bmi: 25.85
+    \item s5: 18.66
+    \item bp: 11.92
+    \item sex: -2.51
+    \item s3: -8.26
+\end{enumerate}
+
+\section{Modeling Phase 2: Interaction Features}
+
+PolynomialFeatures (degree=2, interactions only) expanded the feature set to 55.
+
+\begin{table}[h!]
+\centering
+\caption{Model Performance with Interaction Features}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Model} & \textbf{Test R$^2$} & \textbf{Key Findings} \\
+\midrule
+Linear Regression & 0.478 & Slight improvement, mild overfitting \\
+Ridge Regression (CV) & 0.500 & Best $\alpha=100.0$ \\
+Lasso Regression (CV) & 0.514 & Best $\alpha=1.0$; retained 32 features \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Selected Features (Lasso, $\alpha=5$)}
+Nine non-zero coefficients were retained:
+\begin{enumerate}
+    \item bmi: 25.69
+    \item s5: 18.94
+    \item bp: 11.58
+    \item bmi * bp: 2.47
+    \item age * sex: 2.07
+    \item bmi * s6: 1.14
+    \item age * bp: 0.50
+    \item sex: -2.52
+    \item s3: -7.95
+\end{enumerate}
+
+\section{Final Model Selection and Diagnostics}
+
+\subsection{Performance}
+The final Linear Regression model using the 9 Lasso-selected features achieved:
+\[
+R^2_{\text{test}} = 0.535
+\]
+This represents a 17\% improvement over the baseline Linear Regression (0.453) and validates that regularization-driven feature selection enhances both interpretability and accuracy.
+
+\subsection{Diagnostic Plots}
+
+\textbf{Predicted vs. Actual:} Points closely follow the diagonal line, indicating a strong linear relationship.  
+\textbf{Residuals vs. Predicted:} Residuals are centered around zero with mild heteroscedasticity.  
+\textbf{Q--Q Plot:} Residuals approximately follow a normal distribution.  
+\textbf{Histogram:} Symmetric and bell-shaped residual distribution.
+
+\section{Conclusion and Reflection}
+
+This analysis demonstrates how performance improves systematically through feature engineering and regularization.  
+The experiment highlighted the bias-variance tradeoff:
+
+\begin{itemize}
+    \item \textbf{Reducing bias:} Polynomial interactions captured nonlinear effects.
+    \item \textbf{Controlling variance:} Regularization prevented overfitting.
+\end{itemize}
+
+\textbf{Interpretability:} Despite model expansions, \texttt{bmi}, \texttt{s5}, and \texttt{bp} consistently emerged as key predictors.
+
+The final model balances simplicity and performance, achieving $R^2 = 0.535$ with only nine interpretable features.  
+This underscores that in applied machine learning, \emph{meaningful simplicity often outperforms unnecessary complexity.}
+
+\end{document}
